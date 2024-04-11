@@ -1,0 +1,43 @@
+{
+  "employment_data": {
+    "endpoint": "https://zircon.datausa.io/api/data?drilldowns=Year,Gender,Age&measures=Total Population&Geography=01000US&Workforce Status=true",
+    "model_name": "EmploymentData",
+    "required_fields": ["ID Year", "Year", "ID Gender", "Gender", "ID Age", "Age", "ID Workforce Status", "Workforce Status", "Total Population", "Geography", "ID Geography", "Slug Geography"]
+  },
+
+  "working_population_data": {
+    "endpoint": "https://zircon.datausa.io/api/data?Geography=01000US&drilldowns=Age,Gender,Group,Year&measures=Total Population,Total Population MOE Appx,Average Wage,Average Wage Appx MOE",
+    "model_name": "WorkingPopulationData",
+    "required_fields": ["ID Age", "Age", "ID Gender", "Gender", "ID Group", "Group", "ID Year", "Year", "Total Population", "Total Population MOE Appx", "Average Wage", "Average Wage Appx MOE", "Geography", "ID Geography", "Slug Geography"]
+  },
+
+  "housing_data": {
+    "endpoint": "https://zircon.datausa.io/api/data?measure=Year,Real Estate Taxes by Mortgage,Real Estate Taxes by Mortgage Moe&Geography=01000US,01000US&drilldowns=Real Estate Taxes Paid",
+    "model_name": "HousingData",
+    "required_fields": ["ID Real Estate Taxes Paid", "Real Estate Taxes Paid", "ID Year", "Year", "Real Estate Taxes by Mortgage", "Real Estate Taxes by Mortgage Moe", "Geography", "ID Geography", "Slug Geography"]
+  },
+
+  "equity_data": {
+    "endpoint": "https://zircon.datausa.io/api/data?Geography=01000US:children&measure=Household Income by Race,Household Income by Race Moe&drilldowns=Race",
+    "model_name": "EquityData",
+    "required_fields": ["ID Race", "Race", "ID State", "State", "ID Year", "Year", "Household Income by Race", "Household Income by Race Moe", "Slug State"]
+  },
+
+  "poverty_data": {
+    "endpoint": "https://zircon.datausa.io/api/data?drilldowns=State,Year&measures=Severe Housing Problems,Severe Housing Problems CI Low,Severe Housing Problems CI High",
+    "model_name": "PovertyData",
+    "required_fields": ["ID State", "State", "ID Year", "Year", "Severe Housing Problems", "Severe Housing Problems CI Low", "Severe Housing Problems CI High", "Slug State"]
+  },
+
+  "health_care_data": {
+    "endpoint": "https://zircon.datausa.io/api/data?Geography=01000US&drilldowns=Year,Health Coverage,Gender&measures=Health Insurance by Gender and Age",
+    "model_name": "HealthCareData",
+    "required_fields": ["ID Year", "Year", "ID Health Coverage", "Health Coverage", "ID Gender", "Gender", "Health Insurance by Gender and Age", "Geography", "ID Geography", "Slug Geography"]
+  },
+
+  "child_mortality_data": {
+    "endpoint": "https://zircon.datausa.io/api/data?drilldowns=State,Year&measures=Child Mortality,Child Mortality CI Low,Child Mortality CI High",
+    "model_name": "ChildMortalityRate",
+    "required_fields": ["ID State", "State", "ID Year", "Year", "Child Mortality", "Child Mortality CI Low", "Child Mortality CI High", "Slug State"]
+  }
+}
