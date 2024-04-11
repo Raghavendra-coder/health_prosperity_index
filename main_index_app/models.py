@@ -69,7 +69,9 @@ class WorkingPopulationData(YearModel, GeographyModel, TimeStampModel):
     total_population = models.BigIntegerField()
     total_population_moe_appx = models.FloatField()
     average_wage = models.FloatField(null=True)
-    average_wage_moe_appx = models.FloatField(null=True)
+    average_wage_appx_moe = models.FloatField(null=True)
+    id_group = models.CharField(max_length=30)
+    group = models.CharField(max_length=30)
 
 
 class HousingData(YearModel, GeographyModel, TimeStampModel):
@@ -120,13 +122,19 @@ class ChildMortalityRate(YearModel, TimeStampModel):
     child_mortality_ci_low = models.FloatField(null=True)
 
 
-class HealthProsperityIndexData(YearModel, TimeStampModel):
+class HealthProsperityIndexData(TimeStampModel):
     id = models.CharField(max_length=36, default=uuid.uuid4, primary_key=True, editable=False, unique=True)
-    employment_total_population = models.IntegerField(null=True, blank=True)
-    working_total_population = models.IntegerField(null=True, blank=True)
-    real_estate_taxes_by_mortgage = models.FloatField(null=True, blank=True)
-    household_income = models.FloatField(null=True, blank=True)
-    severe_housing_problem = models.FloatField(null=True, blank=True)
-    child_mortality_rate = models.FloatField(null=True, blank=True)
-    working_average_wage = models.FloatField(null=True, blank=True)
-    health_care_insurance = models.FloatField(null=True, blank=True)
+    year = models.CharField(max_length=4)
+    employment_total_population = models.IntegerField(null=True)
+    working_total_population = models.IntegerField(null=True)
+    real_estate_taxes_by_mortgage = models.FloatField(null=True)
+    household_income = models.FloatField(null=True)
+    severe_housing_problem = models.FloatField(null=True)
+    child_mortality_rate = models.FloatField(null=True)
+    working_average_wage = models.FloatField(null=True)
+    health_care_insurance = models.FloatField(null=True)
+
+
+class YearIndexTable(TimeStampModel):
+    year = models.CharField(max_length=4)
+    health_prosperity_index = models.FloatField(null=True)
