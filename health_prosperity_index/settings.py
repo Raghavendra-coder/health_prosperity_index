@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from celery.schedules import crontab
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'main_index_app'
+    'main_index_app',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -127,4 +129,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOCAL = True
 LOCAL_BASE_URL = "http://127.0.0.1:8000"
 DEPLOYED_BASE_URL = "http://0.0.0.0:8000"
+
+CELERY_BROKER_URL = 'redis://localhost:6360/0'  # Using Redis as the broker
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6360/0'
+CELERY_TIMEZONE = 'UTC'
+CELERY_BEAT_SCHEDULE = {
+        'task-first': {
+            'task': 'main_index_app.tasks.daily_update_data',
+            'schedule': crontab(hour=0, minute=0) #update everyday at 00:00 utc
+            # 'schedule': timedelta(seconds=1)
+        }
+}
 
