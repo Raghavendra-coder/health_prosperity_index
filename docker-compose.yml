@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: gunicorn health_prosperity_index.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6360/0
+      - TZ=UTC
+
+  celeryworker:
+    build: .
+    command: celery -A health_prosperity_index worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+      - redis
+
+  celerybeat:
+    build: .
+    command: celery -A health_prosperity_index beat -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6360:6360"
+    command: ["redis-server", "--appendonly", "yes", "--port", "6360"]
+
+  streamlit:
+    build: .
+    command: bash -c "cd /app && streamlit run streamlit_file.py --server.port 8502"
+    ports:
+      - "8502:8502"
+    depends_on:
+      - web
