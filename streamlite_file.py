@@ -4,6 +4,10 @@ import numpy as np
 import streamlit as st
 import altair as alt
 from django.conf import settings
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'health_prosperity_index.settings')
+django.setup()
 
 
 def get_health_prosperity_index_graph():
@@ -36,11 +40,11 @@ def get_health_prosperity_index_graph():
             chart = (line + points).interactive()
 
             # Render the chart in Streamlit
-            st.altair_chart(chart, use_container_width=True,)
+            st.altair_chart(chart, use_container_width=True)
 
             st.dataframe(final_data_with_index.loc[:, ['Year', 'Health and Prosperity Index']])
         else:
-            st.write(f"API response error {response.status_code}")
+            st.write(f"API response error {response.json()}")
 
     except Exception as e:
         st.write("Sorry unable to process the graph due to some exception in our system. Thanks for your patience", e)

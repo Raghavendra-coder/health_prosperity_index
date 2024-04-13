@@ -17,4 +17,4 @@ RUN pip install --upgrade pip && \
 COPY . /app/
 
 # Uncomment the line below if you want to run a Streamlit app as the default command
-#CMD ["streamlit", "run", "streamlit_file.py", "--server.port", "8502"]
+#CMD ["streamlit", "run", "streamlit_file.py", "--server.port", "8502"8502]
