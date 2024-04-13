@@ -1,16 +1,21 @@
 import os
 import json
+import time
 from pathlib import Path
 import pandas as pd
 import numpy as np
 import requests
-
+import streamlit as st
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'health_prosperity_index.settings')
 django.setup()
 from django.apps import apps
 from django.utils.text import slugify
 from main_index_app.models import *
+import streamlit as st
+from django import db
+
+progress_bar = st.progress(0)
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -18,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent
 json_file_path = BASE_DIR / 'datausa_endpoints.json'
 
 
-def insert_data(data, model_name):
+def insert_data(data, model_name, add=False, progress_count=0, progress_text="", total_entry=0):
     """
     This function is used to add data from datausa to our relative database model
     :param data:
@@ -26,6 +31,7 @@ def insert_data(data, model_name):
     :return:
     """
     ModelName = apps.get_model(app_label='main_index_app', model_name=model_name)
+    entry_count = 1
     for row in data:
         insert_row = dict()
         for key, value in row.items():
@@ -34,6 +40,11 @@ def insert_data(data, model_name):
                 insert_row[slugified_key] = value
         instance = ModelName(**insert_row)
         instance.save()
+        db.close_old_connections()
+        if add:
+            new_progress_text = f"{progress_text} {entry_count}/{total_entry} entries added"
+            progress_bar.progress(progress_count, text=new_progress_text)
+        entry_count += 1
 
 
 def extract_api_data(endpoint):
@@ -91,7 +102,7 @@ def update_data_in_column(model_name, deciding_field, health_index_field_name, o
     insert_data_index_table(health_index_field_name, return_dict)
 
 
-def populate_data():
+def populate_data(add=False):
     """
         Populate/save the data from datausa to all tables in database
     """
@@ -102,12 +113,21 @@ def populate_data():
     except FileNotFoundError:
         pass
     else:
+        progress_count = 0
+        db_count = 1
         for value in data.values():
             endpoint = value['endpoint']
             model_name = value['model_name']
+            progress_text = ""
+            if add:
+                progress_text = f"Updating db {db_count} out of 9. {model_name}: "
+                progress_bar.progress(progress_count, text=f"{progress_text} Fetching data from API.")
             data = extract_api_data(endpoint)
             if len(data):
-                insert_data(data, model_name)
+                insert_data(data, model_name, add,
+                            progress_count, progress_text, len(data))
+            progress_count += 11
+            db_count += 1
 
 
 def populate_health_index_table():
@@ -161,14 +181,27 @@ def save_health_prosperity_index_in_data():
         YearIndexTable.objects.update_or_create(year=key, defaults={"health_prosperity_index": value})
 
 
-def populate_data_in_database():
+def populate_data_in_database(add=False):
     """
     this function is used to add all the data in database
     :return:
     """
-    populate_data()
-    populate_health_index_table()
-    save_health_prosperity_index_in_data()
+    if add:
+        instruction = st.info("Currently there is no data in database. Please wait while we are updating it",
+                              icon="ℹ️")
+        spinner = st.spinner(text="In progress...")
+        with spinner:
+            populate_data(add)
+            progress_bar.progress(90, text="Updating db 8 out of 9")
+            populate_health_index_table()
+            progress_bar.progress(100, text="Updating db 9 out of 9")
+            save_health_prosperity_index_in_data()
+        progress_bar.empty()
+        instruction.empty()
+    else:
+        populate_data()
+        populate_health_index_table()
+        save_health_prosperity_index_in_data()
 
 
 if __name__ == '__main__':

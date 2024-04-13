@@ -10,6 +10,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt /app/
+COPY db.sqlite3 /app/
+
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 

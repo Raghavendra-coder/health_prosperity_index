@@ -6,6 +6,7 @@ services:
     command: gunicorn health_prosperity_index.wsgi:application --workers 3 --threads 2 --bind 0.0.0.0:8000
     volumes:
       - .:/app
+      - ./data:/app/data
     ports:
       - 8000:8000
     depends_on:
@@ -13,7 +14,7 @@ services:
     environment:
       - REDIS_URL=redis://redis:6360/0
       - TZ=UTC
-    mem_limit: 512m
+
 
   celeryworker:
     build: .
@@ -41,7 +42,9 @@ services:
 
   streamlit:
     build: .
-    command: bash -c "cd /app && streamlit run streamlite_file.py --server.port 8502"
+    command: bash -c "cd /app && streamlit run streamlit_file.py --server.port 8502"
+    volumes:
+      - ./data:/app/data
     ports:
       - "8502:8502"
     depends_on:
