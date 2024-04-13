@@ -1,16 +1,18 @@
 import os
 import json
+import time
 from pathlib import Path
 import pandas as pd
 import numpy as np
 import requests
-
+import streamlit as st
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'health_prosperity_index.settings')
 django.setup()
 from django.apps import apps
 from django.utils.text import slugify
 from main_index_app.models import *
+from progress import progress_bar
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -34,6 +36,7 @@ def insert_data(data, model_name):
                 insert_row[slugified_key] = value
         instance = ModelName(**insert_row)
         instance.save()
+        st.write(ModelName.objects.all().values('id')[0])
 
 
 def extract_api_data(endpoint):
@@ -91,7 +94,7 @@ def update_data_in_column(model_name, deciding_field, health_index_field_name, o
     insert_data_index_table(health_index_field_name, return_dict)
 
 
-def populate_data():
+def populate_data(add=False):
     """
         Populate/save the data from datausa to all tables in database
     """
@@ -102,12 +105,19 @@ def populate_data():
     except FileNotFoundError:
         pass
     else:
+        progress_count = 0
+        db_count = 1
         for value in data.values():
             endpoint = value['endpoint']
             model_name = value['model_name']
+            if add:
+                progress_text = f"Updating db {db_count} out of 9"
+                progress_bar.progress(progress_count, text=progress_text)
             data = extract_api_data(endpoint)
             if len(data):
                 insert_data(data, model_name)
+            progress_count += 11
+            db_count += 1
 
 
 def populate_health_index_table():
@@ -161,14 +171,30 @@ def save_health_prosperity_index_in_data():
         YearIndexTable.objects.update_or_create(year=key, defaults={"health_prosperity_index": value})
 
 
-def populate_data_in_database():
+def populate_data_in_database(add=False):
     """
     this function is used to add all the data in database
     :return:
     """
-    populate_data()
-    populate_health_index_table()
-    save_health_prosperity_index_in_data()
+    if add:
+        instruction = st.info("Currently there is no data in database. Please wait while we are updating it",
+                              icon="ℹ️")
+        spinner = st.spinner(text="In progress...")
+        with spinner:
+            populate_data(add)
+            progress_bar.progress(90, text="Updating db 8 out of 9")
+            populate_health_index_table()
+            progress_bar.progress(100, text="Updating db 9 out of 9")
+            save_health_prosperity_index_in_data()
+        progress_bar.empty()
+        instruction.empty()
+        success_text = st.success("Database update complete. Fetching chart", icon="✅")
+        time.sleep(2)
+        success_text.empty()
+    else:
+        populate_data()
+        populate_health_index_table()
+        save_health_prosperity_index_in_data()
 
 
 if __name__ == '__main__':
